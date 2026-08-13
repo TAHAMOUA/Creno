@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RendezVousController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,5 +20,10 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin-test', function () {
     return 'Bienvenue Admin';
 })->middleware('auth', 'isAdmin');
-
+Route::post('/rendez-vous', [RendezVousController::class, 'store'])
+    ->middleware('auth')
+    ->name('rendez-vous.store');
 require __DIR__.'/auth.php';
+Route::patch('/rendez-vous/{rendezVous}/cancel', [RendezVousController::class, 'cancel'])
+    ->middleware('auth')
+    ->name('rendez-vous.cancel');
