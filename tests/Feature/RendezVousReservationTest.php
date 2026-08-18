@@ -165,4 +165,67 @@ class RendezVousReservationTest extends TestCase
         'statut' => 'en_attente',
     ]);
     }
+    public function test_client_cannot_reserve_same_creneau_twice(): void
+{
+    $user = User::factory()->create();
+
+    $creneau = Creneau::create([
+        'date' => now()->addDay()->format('Y-m-d'),
+        'heure_debut' => '10:00',
+        'duree' => 60,
+    ]);
+
+    // Premier réservation
+    $this->actingAs($user)
+        ->post('/rendez-vous', [
+            'creneau_id' => $creneau->id,
+        ]);
+
+    $response = $this->actingAs($user)
+        ->post('/rendez-vous', [
+            'creneau_id' => $creneau->id,
+        ]);
+
+    $response->assertSessionHasErrors('creneau_id');
+
+    $this->assertDatabaseCount('rendez_vous', 1);
+    }
+    public function test_client_can_reserve_creneau_starting_when_previous_one_ends(): void
+{
+    $user = User::factory()->create();
+
+    $creneau1 = Creneau::create([
+        'date' => now()->addDay()->format('Y-m-d'),
+        'heure_debut' => '10:00',
+        'duree' => 60,
+    ]);
+
+    $creneau2 = Creneau::create([
+        'date' => now()->addDay()->format('Y-m-d'),
+        'heure_debut' => '11:00',
+        'duree' => 60,
+    ]);
+
+    // Premier rendez-vous : 10h → 11h
+    $this->actingAs($user)
+        ->post('/rendez-vous', [
+            'creneau_id' => $creneau1->id,
+        ]);
+
+    // Deuxième rendez-vous : 11h → 12h
+    $response = $this->actingAs($user)
+        ->post('/rendez-vous', [
+            'creneau_id' => $creneau2->id,
+        ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $this->assertDatabaseCount('rendez_vous', 2);
+
+    $this->assertDatabaseHas('rendez_vous', [
+        'user_id' => $user->id,
+        'creneau_id' => $creneau2->id,
+        'statut' => 'en_attente',
+    ]);
+    }
 }
