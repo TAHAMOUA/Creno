@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RendezVous extends Model
 {
     use HasFactory;
-
+    protected $table = 'rendez_vous';
     protected $fillable = [
         'user_id',
         'creneau_id',

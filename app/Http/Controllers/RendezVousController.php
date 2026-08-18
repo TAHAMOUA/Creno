@@ -10,6 +10,7 @@ class RendezVousController extends Controller
 {
     public function store(StoreRendezVousRequest $request)
     {
+        $user = $request->user();
         $creneau = Creneau::findOrFail($request->creneau_id);
 
         // 1. Créneau passé
@@ -32,7 +33,7 @@ class RendezVousController extends Controller
         }
 
         // 3. Chevauchement avec un autre rendez-vous du client
-        $userRendezVous = auth()->user()
+        $userRendezVous = $user
             ->rendezVous()
             ->whereIn('statut', ['en_attente', 'confirme'])
             ->with('creneau')
@@ -48,7 +49,7 @@ class RendezVousController extends Controller
 
         // 4. Création du rendez-vous
         RendezVous::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'creneau_id' => $creneau->id,
             'statut' => 'en_attente',
         ]);
@@ -57,7 +58,11 @@ class RendezVousController extends Controller
     }
     public function cancel(RendezVous $rendezVous)
 {
-    $this->authorize('delete', $rendezVous);
+    $user = auth()->user();
+    if (! app(\App\Policies\RendezVousPolicy::class)
+    ->delete($user, $rendezVous)) {
+    abort(403);
+    }
 
     $rendezVous->update([
         'statut' => 'annule',
