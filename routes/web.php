@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RendezVousController;
 use App\Http\Controllers\CreneauController;
+use App\Http\Controllers\AdminDashboardController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -28,6 +29,9 @@ Route::patch('/rendez-vous/{rendezVous}/cancel', [RendezVousController::class, '
 Route::get('/mes-rendez-vous', [RendezVousController::class, 'index'])
     ->middleware('auth')
     ->name('rendez-vous.index');
+Route::get('/creneaux', [CreneauController::class, 'disponibles'])
+    ->middleware('auth')
+    ->name('creneaux.index');
 Route::get('/admin-test', function () {
     return 'Bienvenue Admin';
 })->middleware('auth', 'isAdmin');
@@ -36,6 +40,9 @@ Route::middleware(['auth', 'isAdmin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        Route::get('/', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
 
         Route::get('/creneaux', [CreneauController::class, 'index'])
             ->name('creneaux.index');

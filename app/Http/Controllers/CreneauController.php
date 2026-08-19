@@ -21,6 +21,16 @@ class CreneauController extends Controller
     return view('admin.creneaux.index', compact('creneaux'));
 }
 
+    public function disponibles()
+    {
+        $creneaux = Creneau::disponibles()
+            ->orderBy('date')
+            ->orderBy('heure_debut')
+            ->get();
+
+        return view('creneaux.index', compact('creneaux'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
