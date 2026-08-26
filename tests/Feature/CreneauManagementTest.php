@@ -105,9 +105,11 @@ public function test_admin_can_create_creneau(): void
         'role' => 'admin',
     ]);
 
+    $date = now()->addDay()->format('Y-m-d');
+
     $response = $this->actingAs($admin)
         ->post('/admin/creneaux', [
-            'date' => '2026-08-25',
+            'date' => $date,
             'heure_debut' => '14:00',
             'duree' => 45,
         ]);
@@ -115,10 +117,10 @@ public function test_admin_can_create_creneau(): void
     $response->assertRedirect();
 
     $this->assertDatabaseHas('creneaux', [
-    'date' => '2026-08-25 00:00:00',
-    'heure_debut' => '14:00',
-    'duree' => 45,
-]);
+        'date' => $date . ' 00:00:00',
+        'heure_debut' => '14:00',
+        'duree' => 45,
+    ]);
 }
 public function test_client_cannot_create_creneau(): void
 {
